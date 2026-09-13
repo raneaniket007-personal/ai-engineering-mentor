@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 from dotenv import load_dotenv
 from google import genai
@@ -18,10 +19,12 @@ class LLMClient:
 
         self.client = genai.Client(api_key=api_key)
 
-    def generate(self, user_message: str) -> str:
+    def generate(
+        self, contents: Any
+    ) -> types.GenerateContentResponse:
         response = self.client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=user_message,
+            model="gemini-3.8-flash",
+            contents=contents,
             config=types.GenerateContentConfig(
                 tools=[search_knowledge],
                 system_instruction=(
@@ -31,7 +34,10 @@ class LLMClient:
                     "Prefer concrete examples and explain the reasoning behind "
                     "architectural decisions."
                 ),
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                    disable=True
+                ),
             ),
         )
 
-        return response.text or ""
+        return response

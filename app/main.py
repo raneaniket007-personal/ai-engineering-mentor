@@ -1,8 +1,9 @@
+from app.agent.loop import Agent
 from app.llm.client import LLMClient
 
 
 def main() -> None:
-    mentor = LLMClient()
+    mentor = Agent(LLMClient())
 
     print("AI Engineering Mentor")
     print("Type 'exit' to quit.\n")
@@ -13,7 +14,7 @@ def main() -> None:
         if user_message.lower() == "exit":
             break
 
-        response = mentor.generate(user_message)
+        response = mentor.run_conversation(user_message)
 
         print(f"\nMentor: {response}\n")
 
