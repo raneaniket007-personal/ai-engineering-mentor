@@ -2,6 +2,9 @@ import os
 
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
+
+from app.tools.knowledge import search_knowledge
 
 load_dotenv()
 
@@ -16,18 +19,19 @@ class LLMClient:
         self.client = genai.Client(api_key=api_key)
 
     def generate(self, user_message: str) -> str:
-        interaction = self.client.interactions.create(
-            model="gemini-3.8-flash",
-            input=user_message,
-            system_instruction=(
-                """
-                You are an AI Engineering Mentor.
-                Your job is to teach AI engineering concepts clearly
-                and practically. Adapt explanations to the learner's level.
-                Prefer concrete examples and explain the reasoning behind
-                architectural decisions.
-                """
-            ),  
+        response = self.client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=user_message,
+            config=types.GenerateContentConfig(
+                tools=[search_knowledge],
+                system_instruction=(
+                    "You are an AI Engineering Mentor. "
+                    "Your job is to teach AI engineering concepts clearly "
+                    "and practically. Adapt explanations to the learner's level. "
+                    "Prefer concrete examples and explain the reasoning behind "
+                    "architectural decisions."
+                ),
+            ),
         )
 
-        return interaction.output_text or ""
+        return response.text or ""
