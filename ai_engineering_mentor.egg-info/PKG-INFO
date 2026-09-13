@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: ai-engineering-mentor
+Version: 0.1.0
+Summary: An AI Engineering Mentor built to explore agent engineering concepts.
+Requires-Python: <3.14,>=3.13
+Requires-Dist: google-genai
+Requires-Dist: openai
+Requires-Dist: python-dotenv
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: mypy; extra == "dev"

@@ -1,0 +1,9 @@
+openai
+python-dotenv
+fastapi
+uvicorn
+
+[dev]
+pytest
+ruff
+mypy

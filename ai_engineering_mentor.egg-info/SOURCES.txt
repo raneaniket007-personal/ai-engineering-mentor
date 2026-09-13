@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+ai_engineering_mentor.egg-info/PKG-INFO
+ai_engineering_mentor.egg-info/SOURCES.txt
+ai_engineering_mentor.egg-info/dependency_links.txt
+ai_engineering_mentor.egg-info/requires.txt
+ai_engineering_mentor.egg-info/top_level.txt
+app/__init__.py
+app/main.py
+app/llm/__init__.py
+app/llm/client.py
