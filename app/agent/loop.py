@@ -1,13 +1,40 @@
 from typing import Any
 from google.genai import types
 
-from app.tools.registry import TOOLS
+from app.agent.config import AgentConfig
+from app.agent.events import AgentEvent
+from app.agent.executor import ToolExecutor
 
 
 class Agent:
-    def __init__(self, llm_client: Any) -> None:
+    def __init__(
+        self,
+        llm_client: Any,
+        config: AgentConfig | None = None,
+    ) -> None:
         self.llm_client = llm_client
+        self.config = config or AgentConfig()
+        self.tool_executor = ToolExecutor()
         self.messages: list[types.Content] = []
+    
+    def emit_event(self, event: AgentEvent) -> None:
+        if event.type == "tool_call":
+            print(
+                f"Tool requested: {event.data['name']}"
+            )
+            print(
+                f"Arguments: {event.data['args']}"
+            )
+
+        elif event.type == "tool_result":
+            print(
+                f"Tool result: {event.data['result']}"
+            )
+
+        elif event.type == "tool_error":
+            print(
+                f"Tool error: {event.data['error']}"
+            )
 
     def add_user_message(self, message: str) -> None:
         self.messages.append(
@@ -17,53 +44,79 @@ class Agent:
             )
         )
 
-    def execute_tool(self, name: str, args: dict[str, Any]) -> Any:
-        tool = TOOLS.get(name)
-
-        if tool is None:
-            raise ValueError(f"Unknown tool: {name}")
-
-        return tool(**args)
-
     def run_conversation(self, user_message: str) -> str:
         self.add_user_message(user_message)
 
-        while True:
-            # Send entire conversation history to LLM
+        for iteration in range(self.config.max_iterations):
             response = self.llm_client.generate(self.messages)
 
             candidate_content = response.candidates[0].content
-            # Append model turn (text or function_call) to history
+
             self.messages.append(candidate_content)
 
-            # Check if model requested a tool call
             has_tool_call = False
             tool_response_parts = []
 
             for part in candidate_content.parts:
-                if part.function_call:
-                    has_tool_call = True
-                    function_call = part.function_call
+                if not part.function_call:
+                    continue
 
-                    print(f"Tool requested: {function_call.name}")
-                    print(f"Arguments: {function_call.args}")
+                has_tool_call = True
 
-                    # Execute requested tool
-                    result = self.execute_tool(
-                        function_call.name,
-                        function_call.args,
+                function_call = part.function_call
+
+                self.emit_event(
+                    AgentEvent(
+                        type="tool_call",
+                        data={
+                            "name": function_call.name,
+                            "args": dict(function_call.args),
+                        },
                     )
-                    print(f"Tool result: {result}")
+                )
 
-                    tool_response_parts.append(
-                        types.Part(
+                try:
+                    result = self.tool_executor.execute(
+                        function_call.name,
+                        dict(function_call.args),
+                    )
+
+                    self.emit_event(
+                        AgentEvent(
+                            type="tool_result",
+                            data={
+                                "name": function_call.name,
+                                "result": result,
+                            },
+                        )
+                    )
+
+                except Exception as exc:
+                    error_message = str(exc)
+
+                    self.emit_event(
+                        AgentEvent(
+                            type="tool_error",
+                            data={
+                                "name": function_call.name,
+                                "error": error_message,
+                            },
+                        )
+                    )
+
+                    result = {
+                        "error": error_message,
+                    }
+
+                tool_response_parts.append(
+                    types.Part(
                             function_response=types.FunctionResponse(
                                 name=function_call.name,
                                 response={"result": result},
                                 id=getattr(function_call, "id", None),
                             )
                         )
-                    )
+                )
 
             if tool_response_parts:
                 self.messages.append(
@@ -73,6 +126,10 @@ class Agent:
                     )
                 )
 
-            # If no tool calls were requested in this turn, return final text
             if not has_tool_call:
                 return response.text or ""
+
+        raise RuntimeError(
+            f"Agent exceeded maximum iterations: "
+            f"{self.config.max_iterations}"
+        )

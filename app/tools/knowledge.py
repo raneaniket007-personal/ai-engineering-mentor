@@ -1,3 +1,8 @@
+from pydantic import BaseModel
+
+class SearchKnowledgeArgs(BaseModel):
+    query: str
+
 KNOWLEDGE = [
     {
         "topic": "rag",

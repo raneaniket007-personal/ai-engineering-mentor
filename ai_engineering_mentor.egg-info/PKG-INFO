@@ -8,6 +8,7 @@ Requires-Dist: openai
 Requires-Dist: python-dotenv
 Requires-Dist: fastapi
 Requires-Dist: uvicorn
+Requires-Dist: pydantic
 Provides-Extra: dev
 Requires-Dist: pytest; extra == "dev"
 Requires-Dist: ruff; extra == "dev"

@@ -7,5 +7,11 @@ ai_engineering_mentor.egg-info/requires.txt
 ai_engineering_mentor.egg-info/top_level.txt
 app/__init__.py
 app/main.py
+app/agent/__init__.py
+app/agent/executor.py
+app/agent/loop.py
 app/llm/__init__.py
 app/llm/client.py
+app/tools/__init__.py
+app/tools/knowledge.py
+app/tools/registry.py

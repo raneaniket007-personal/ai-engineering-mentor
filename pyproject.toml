@@ -9,6 +9,7 @@ dependencies = [
     "python-dotenv",
     "fastapi",
     "uvicorn",
+    "pydantic",
 ]
 
 [project.optional-dependencies]

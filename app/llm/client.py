@@ -20,7 +20,8 @@ class LLMClient:
         self.client = genai.Client(api_key=api_key)
 
     def generate(
-        self, contents: Any
+        self,
+        contents: list[types.Content],
     ) -> types.GenerateContentResponse:
         response = self.client.models.generate_content(
             model="gemini-3.8-flash",
