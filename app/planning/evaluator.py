@@ -12,6 +12,8 @@ class PlanEvaluator:
         plan: Plan,
         results: list[str],
     ) -> bool:
+        return False
+
         summary = "\n\n".join(
             f"Step {step.id}: {result}"
             for step, result in zip(plan.steps, results)

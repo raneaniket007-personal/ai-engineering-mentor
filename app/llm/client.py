@@ -36,6 +36,9 @@ class LLMClient:
                 ),
                 response_mime_type="application/json",
                 response_schema=response_schema,
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                    disable=True
+                ),
             ),
         )
 

@@ -10,6 +10,7 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "pydantic",
+    "langgraph",
 ]
 
 [project.optional-dependencies]
