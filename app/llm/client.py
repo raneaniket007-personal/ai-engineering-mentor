@@ -1,3 +1,4 @@
+from app.planning.models import Plan
 import os
 from typing import Any
 
@@ -18,6 +19,27 @@ class LLMClient:
             raise ValueError("GEMINI_API_KEY is not set.")
 
         self.client = genai.Client(api_key=api_key)
+
+    def generate_structured(
+        self,
+        prompt: str,
+        response_schema: type[Plan],
+    ) -> Plan:
+        response = self.client.models.generate_content(
+            model="gemini-3.8-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=(
+                    "You are an AI Engineering Mentor. "
+                    "Create clear, practical plans for accomplishing "
+                    "complex engineering goals."
+                ),
+                response_mime_type="application/json",
+                response_schema=response_schema,
+            ),
+        )
+
+        return response.parsed
 
     def generate(
         self,
